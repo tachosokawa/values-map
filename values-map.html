@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>細川 拓の価値観マップ — PATCH&PLAY</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; width: 100%; }
+  body { background: #0C0C0E; overflow: hidden; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const data = {
+  branches: [
+    {
+      id: "upcycle",
+      label: "アップサイクル思考",
+      color: "#2D5A27",
+      description: "既にある素材・モノに新しい文脈を重ねて価値を生む。\n「作る」より「活かす」。廃棄ではなく変容。",
+      keywords: ["古着の上にプリント", "広告をアップサイクル", "チラシ紙をアップサイクル", "お直し屋", "アップサイクル家具", "sustainable item"],
+      question: "捨てる前に「これは何に生まれ変われる？」と問う",
+      icon: "♻️",
+    },
+    {
+      id: "handcraft",
+      label: "手ざわりのあるクラフト",
+      color: "#8B4513",
+      description: "シルクスクリーン、刺繍、パッチワーク、ワッペン。\nデジタルでは出せない「不均一さ」と「手の温度」を大切にする。",
+      keywords: ["iphone patch", "シルクスクリーン印刷", "ビーズ刺繍", "クッションカバー刺繍", "コーチジャケット刺繍", "ロゼット", "sacaiワッペン"],
+      question: "それは「手で触りたくなる」か？",
+      icon: "🧵",
+    },
+    {
+      id: "retropop",
+      label: "レトロ × ポップカルチャー",
+      color: "#C62828",
+      description: "手塚治虫、PEZ、ぬいぐるみ。\n懐かしさの中にある普遍的なかわいさと、少しの毒。\n大人が本気で愛せるポップ。",
+      keywords: ["手塚治虫", "PEZ collection", "大人ぬいぐるみ", "黒いぬいぐるみ", "stuffed toy for adult", "Kawaii Design"],
+      question: "子供の頃の感動を、大人の目線で再解釈できているか？",
+      icon: "🤖",
+    },
+    {
+      id: "space",
+      label: "空間と体験のデザイン",
+      color: "#1565C0",
+      description: "抹茶サロン、カフェ、レストラン建築。\nプロダクト単体ではなく「それが置かれる場所」まで想像する。\n五感で味わえる世界観。",
+      keywords: ["抹茶サロン", "抹茶カフェ", "コーヒー丁寧", "Japanese Tea Ceremony", "Restaurant Architecture", "Shop Interior"],
+      question: "その空間に「居たい」と思えるか？",
+      icon: "🍵",
+    },
+    {
+      id: "editorial",
+      label: "エディトリアル / 表現手法",
+      color: "#6A1B9A",
+      description: "写真・コラージュ・文字組み・レイアウト・リール構成。\n中身だけでなく「どう見せるか」にも同じ熱量を注ぐ。",
+      keywords: ["パルコ看板", "パルコチラシ", "Graphic Design", "Poster Design", "Book and Magazine Design", "Screenprinting"],
+      question: "「見せ方」は「中身」と同じくらい練られているか？",
+      icon: "📐",
+    },
+    {
+      id: "fashion",
+      label: "実験的ファッション",
+      color: "#E65100",
+      description: "sacai、mihara yasuhiro、ANREALAGE、marni。\n「きれいにまとまる」より「違和感があるのに成立する」。\n異素材の組み合わせ、構造の解体と再構築。",
+      keywords: ["sacaiワッペン", "mihara yasuhiro", "ANREALAGE", "marni cardigan", "Prada safety pin brooch", "Tシャツ ポケットあとづけ"],
+      question: "「なんか変だけど、かっこいい」を目指せているか？",
+      icon: "🧥",
+    },
+  ],
+};
+
+const principles = [
+  "「新しく作る」前に「既にあるもの」を見る",
+  "デジタルの中にも「手ざわり」を忘れない",
+  "きれいにまとめるより「違和感のある調和」",
+  "プロダクト単体でなく「体験する空間」ごと設計する",
+  "見せ方は中身と同じ熱量で設計する",
+];
+
+function BranchCard({ branch, isSelected, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  const bg = isSelected
+    ? branch.color + "22"
+    : hovered
+    ? "rgba(255,255,255,0.08)"
+    : "rgba(255,255,255,0.04)";
+  const border = isSelected || hovered ? branch.color : "rgba(255,255,255,0.1)";
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        all: "unset",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "14px 18px",
+        borderRadius: "12px",
+        border: `1.5px solid ${border}`,
+        background: bg,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      <span style={{ fontSize: "28px", flexShrink: 0 }}>{branch.icon}</span>
+      <div style={{
+        fontSize: "15px",
+        fontWeight: 700,
+        color: isSelected ? branch.color : "rgba(255,255,255,0.85)",
+        letterSpacing: "0.02em",
+      }}>
+        {branch.label}
+      </div>
+      <span style={{
+        marginLeft: "auto",
+        fontSize: "18px",
+        color: "rgba(255,255,255,0.3)",
+        transform: isSelected ? "rotate(90deg)" : "rotate(0deg)",
+        transition: "transform 0.3s",
+      }}>
+        →
+      </span>
+    </button>
+  );
+}
+
+function DetailPanel({ branch }) {
+  if (!branch) {
+    return (
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        height: "100%", color: "rgba(255,255,255,0.25)", fontSize: "14px",
+        fontStyle: "italic", textAlign: "center", padding: "40px", lineHeight: 1.8,
+      }}>
+        ← 左の項目を選択すると<br />価値観の詳細が表示されます
+      </div>
+    );
+  }
+
+  return (
+    <div key={branch.id} style={{ padding: "32px", animation: "slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "24px" }}>
+        <span style={{ fontSize: "40px" }}>{branch.icon}</span>
+        <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: branch.color, letterSpacing: "-0.01em" }}>
+          {branch.label}
+        </h2>
+      </div>
+
+      <p style={{
+        fontSize: "15px", lineHeight: 1.9, color: "rgba(255,255,255,0.8)",
+        whiteSpace: "pre-line", margin: "0 0 28px 0",
+      }}>
+        {branch.description}
+      </p>
+
+      <div style={{
+        background: branch.color + "15",
+        border: `1px solid ${branch.color}40`,
+        borderRadius: "10px",
+        padding: "16px 20px",
+        marginBottom: "24px",
+      }}>
+        <div style={{
+          fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.12em", color: branch.color, marginBottom: "8px",
+        }}>
+          判断基準（セルフチェック）
+        </div>
+        <div style={{ fontSize: "15px", fontWeight: 600, color: "rgba(255,255,255,0.9)", lineHeight: 1.6 }}>
+          "{branch.question}"
+        </div>
+      </div>
+
+      <div>
+        <div style={{
+          fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", marginBottom: "12px",
+        }}>
+          Pinterestから抽出されたキーワード
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          {branch.keywords.map((kw, i) => (
+            <span key={i} style={{
+              padding: "5px 12px", borderRadius: "20px", fontSize: "12px",
+              background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [selected, setSelected] = useState(null);
+  const selectedBranch = data.branches.find(b => b.id === selected);
+
+  return (
+    <div style={{
+      height: "100vh", display: "flex", flexDirection: "column",
+      background: "#0C0C0E", color: "white",
+      fontFamily: "'Noto Sans JP', 'Helvetica Neue', sans-serif",
+      overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{ padding: "36px 36px 24px", flexShrink: 0, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{
+          fontSize: "10px", fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.2em", color: "rgba(255,255,255,0.3)", marginBottom: "10px",
+        }}>
+          PATCH&PLAY — Creative Direction Guide
+        </div>
+        <h1 style={{
+          margin: "0 0 6px 0", fontSize: "28px", fontWeight: 800, letterSpacing: "-0.02em",
+          background: "linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>
+          細川 拓の価値観マップ
+        </h1>
+        <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: 1.6 }}>
+          Pinterestデータから抽出したクリエイティブ判断の軸
+        </p>
+      </div>
+
+      {/* Principles */}
+      <div style={{
+        padding: "20px 36px", flexShrink: 0,
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", flexWrap: "wrap", gap: "8px",
+      }}>
+        {principles.map((p, i) => (
+          <div key={i} style={{
+            padding: "8px 14px", background: "rgba(255,255,255,0.05)",
+            borderLeft: "2px solid rgba(255,255,255,0.2)",
+            fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.6)",
+            animation: `fadeUp 0.4s ease ${i * 0.08}s both`,
+          }}>
+            {i + 1}. {p}
+          </div>
+        ))}
+      </div>
+
+      {/* Main */}
+      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+        {/* Left */}
+        <div style={{
+          width: "340px", flexShrink: 0, padding: "20px 24px",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px",
+        }}>
+          <div style={{
+            fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
+            letterSpacing: "0.15em", color: "rgba(255,255,255,0.3)", marginBottom: "4px",
+          }}>
+            6つの価値軸
+          </div>
+          {data.branches.map(branch => (
+            <BranchCard
+              key={branch.id}
+              branch={branch}
+              isSelected={selected === branch.id}
+              onClick={() => setSelected(selected === branch.id ? null : branch.id)}
+            />
+          ))}
+        </div>
+
+        {/* Right */}
+        <div style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
+          <DetailPanel branch={selectedBranch} />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: "16px 36px", borderTop: "1px solid rgba(255,255,255,0.06)",
+        fontSize: "10px", color: "rgba(255,255,255,0.2)", textAlign: "center", flexShrink: 0,
+      }}>
+        Pinterest SAR data: 467 pins / 104 searches / 72 inferred interests ・ 判断に迷ったときの「北極星」として使ってください
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
